@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "signshop",
+	"version": "${version}",
+	"name": "signshop",
+	"description": "All in one player-made shop solution.",
+	"authors": [
+		"lukeonuke"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "MIT",
+	"icon": "assets/signshop/icon.png",
+	"environment": "server",
+	"entrypoints": {
+		"main": [
+          "com.lukeonuke.SignShop"
+		]
+	},
+	"mixins": [
+		"signshop.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.8",
+		"minecraft": "~1.21.8",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

@@ -14,7 +14,7 @@ Document index:
 
 # Player guide
 > [!TIP]
-> This section of the readme contains a tutorial on how to use the mod as a 
+> This section of the README contains a tutorial on how to use the mod as a 
 > player, if you are looking for the admin guide, go down to the ***admin 
 > guide*** section of the README.
 
@@ -59,12 +59,11 @@ prefix=
 ```
 
 # Technical documentation
-> [!NOTE]
-> This section of the readme contains a tutorial on how to use the mod as a
-> player, if you are looking for the admin guide, go down to the ***admin
-> guide*** section of the README.
-This section of the README goes over the technical inner workings of the 
+This section of the README goes over the technical inner workings of the
 signshop mod.
+> [!NOTE]
+> This part of the text is still being written.
+
 
 
 

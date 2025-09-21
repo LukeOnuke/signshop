@@ -34,7 +34,7 @@ public class ShopPosition {
     public static ShopPosition fromString(String enc){
         String[] encoded = enc.split("/");
         if (encoded.length < 4) {
-            SignShop.LOGGER.warn("Tried to decode malformed ShopPosition! Value: {}", enc);
+            SignShop.LOGGER.error("Tried to decode malformed ShopPosition! Value: {}", enc);
             return null;
         }
         return new ShopPosition(encoded[0], Integer.parseInt(encoded[1]), Integer.parseInt(encoded[2]), Integer.parseInt(encoded[3]));

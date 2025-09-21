@@ -8,9 +8,9 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -26,17 +26,21 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
     // attack
     @Override
     public ActionResult interact(PlayerEntity playerEntity, World world, Hand hand, BlockPos blockPos, Direction direction) {
+        // Check prerequisites
         if (world.isClient) return ActionResult.PASS;
         final MinecraftServer server = playerEntity.getServer();
         if (server == null) return ActionResult.PASS;
 
         if (InventoryUtil.isHoldingRedstone(playerEntity)) {
+            // Shop creation
             final ShopCreationService scs = ShopCreationService.getInstance();
             final BlockEntity block = world.getBlockEntity(blockPos);
-            if (block instanceof ChestBlockEntity) {
+            if (block instanceof Inventory) {
+                // Set item/price storage
                 scs.setStorage(playerEntity, new ShopPosition(world, blockPos));
                 return ActionResult.FAIL;
             } else if (block instanceof SignBlockEntity) {
+                // Create shop.
                 final SignBlockEntity sign = ShopUtil.getSignIfQualifiesAsShop(world, blockPos);
                 if (sign == null) return ActionResult.PASS;
 
@@ -58,11 +62,13 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
                     return ActionResult.FAIL;
                 }
             } else {
+                // If player clicked on a non chest/sign block reset creation storage.
                 scs.reset(playerEntity);
-                playerEntity.sendMessage(TextService.addPrefix("Reset creation storage."), false);
+                playerEntity.sendMessage(TextService.addPrefix(TextService.successFormat("Cleared shop creation storage.")), false);
                 return ActionResult.FAIL;
             }
         } else {
+            // Get shop information and to player.
             final SignBlockEntity sign = ShopUtil.getSignIfQualifiesAsShop(world, blockPos);
             if (sign == null) return ActionResult.PASS;
 
@@ -85,6 +91,7 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
     // use
     @Override
     public ActionResult interact(PlayerEntity playerEntity, World world, Hand hand, BlockHitResult blockHitResult) {
+        // Prerequisite
         if (world.isClient) return ActionResult.PASS;
 
         final BlockPos blockPos = blockHitResult.getBlockPos();
@@ -95,15 +102,17 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
 
         ShopModel model = ds.getShopByPosition(new ShopPosition(world, blockPos));
         if (model != null) {
-            // Shop exists
+            // Buy from shop if shop exists.
             MessageModel message = ShopUtil.beginTransaction(model, playerEntity, sign);
             if(message.isSuccess()){
+                // If transaction is successful say what player bought.
                 playerEntity.sendMessage(
                         Text.literal("Bought ")
                             .append(TextService.formatShopOffer(model, world)),
                         true
                 );
             }else {
+                // If transaction failed return why and format shop.
                 playerEntity.sendMessage(message.getAsTextMessage(), false);
                 ShopUtil.formatShop(sign, false);
             }
@@ -115,6 +124,7 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
 
     @Override
     public boolean beforeBlockBreak(World world, PlayerEntity playerEntity, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity) {
+        // Prerequisite
         if (blockEntity == null) return true;
         SignBlockEntity signBlock = ShopUtil.getSignIfQualifiesAsShop(blockEntity);
         if (signBlock == null) return true;
@@ -122,11 +132,13 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
         final DatabaseService ds = DatabaseService.getInstance();
         ShopModel shop = ds.getShopByPosition(new ShopPosition(world, blockPos));
         if (shop == null) return true;
+        // If shop exists and the owner is the player allow breaking it.
         if (shop.getOwner().equals(playerEntity.getUuid())) {
             ds.softDeleteShopById(shop.getId());
             playerEntity.sendMessage(TextService.addPrefix(TextService.successFormat("Shop has been removed!")), true);
             return true;
         }
+        // Otherwise return false
         return false;
     }
 }

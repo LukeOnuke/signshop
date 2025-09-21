@@ -19,17 +19,17 @@ Document index:
 > guide*** section of the README.
 
 To create a signshop hold a **redstone dust** in your main hand. Click on the 
-chest containing the items, then click on the chest containing the price.
-Chest containing the price at first must contain the item and the amount of
-item(s) you plan to sell. The price chest must also contain the item you plan
-on using as currency and in an amount you plan to charge.
+container containing the items, then click on the chest containing the price.
+Container containing the price at first must contain the item and the amount of
+item(s) you plan to charge. The item container must contain the item you plan 
+on selling and the amount of items you plan to sell.
 
-After you have clicked on both the item and price chests click on a sign that
-has `[trade]` as its first line. Sign has to have `[trade]` as its first line, 
-the rest can have whatever text you want.
+After you have clicked on both the item and price container click on a sign 
+that has `[trade]` as its first line. Sign has to have `[trade]` as its first 
+line, the rest can have whatever text you want.
 
-*Currently only chests work, although it is planned to make all containers work
-in the future.*
+*As of 0.0.2-ALPHA* signshop supports every storage block. e.g. Chests, hoppers
+shulkerboxes, barrels, trapped chests.
 
 # Admin guide
 This section of the README goes over administration when using this plugin.

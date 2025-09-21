@@ -6,6 +6,7 @@ import com.lukeonuke.model.TransactionModel;
 import net.minecraft.block.entity.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -51,7 +52,7 @@ public class ShopUtil {
 
         // Verify if user can even afford and store the items
         int availablePrice = InventoryUtil.countItems(playerInventory, price);
-        if(availablePrice < shop.getPriceAmount()) return new MessageModel("You cant afford this!", false);
+        if(availablePrice < shop.getPriceAmount()) return new MessageModel("You can't afford this!", false);
         if(!InventoryUtil.canStore(playerInventory, item.getItem(), shop.getItemAmount())) return new MessageModel("Not enough inventory space to buy!", false);
 
         // Get and verify the chests
@@ -61,10 +62,10 @@ public class ShopUtil {
         if(server == null) return new MessageModel("Internal server error! server==null", false);
         if(storagePricePos == null || storageItemPos == null) return new MessageModel("Internal server error! Shop is corrupted! Cant read storage pos.", false);
 
-        ChestBlockEntity storagePrice = getChest(storagePricePos, server);
-        if(storagePrice == null) return new MessageModel("Price chest is missing!", false);
-        ChestBlockEntity storageItem = getChest(storageItemPos, server);
-        if(storageItem == null) return new MessageModel("Item chest is missing!", false);
+        Inventory storagePrice = getStorage(storagePricePos, server);
+        if(storagePrice == null) return new MessageModel("Price storage is missing!", false);
+        Inventory storageItem = getStorage(storageItemPos, server);
+        if(storageItem == null) return new MessageModel("Item storage is missing!", false);
 
         // Verify if the chests have the item and store the results of the transaction
         if(!InventoryUtil.canStore(storagePrice, price.getItem(), shop.getPriceAmount())) return new MessageModel("Shops currency storage is full!", false);
@@ -90,10 +91,22 @@ public class ShopUtil {
         return new MessageModel("Bought " + shop.getItemAmount() + "x " + item.getName().getString() + " for " + shop.getPriceAmount() + "x " + price.getName().getString(), true);
     }
 
-    private static ChestBlockEntity getChest(ShopPosition pos, MinecraftServer server){
+    /**
+     * Fetches the Inventory instance of a storage block at a ShopPosition.
+     * @param pos ShopPosition dictating where the storage is.
+     * @param server Server that holds the shop position.
+     * @return Inventory instance regarding that storage block if it exists, or NULL if it doesn't exist.
+     */
+    @Nullable
+    public static Inventory getStorage(ShopPosition pos, MinecraftServer server){
         ServerWorld world = server.getWorld(pos.getWorldAsRegistryKey());
         if (world == null) return null;
-        return world.getBlockEntity(pos.getBlockPos(), BlockEntityType.CHEST).orElse(null);
+        //return world.getBlockEntity(pos.getBlockPos(), BlockEntityType.CHEST).orElse(null);
+        BlockEntity inventoryCandidate = world.getBlockEntity(pos.getBlockPos());
+        if (inventoryCandidate instanceof Inventory inventory){
+            return inventory;
+        }
+        return null;
     }
 
     /**
@@ -126,7 +139,7 @@ public class ShopUtil {
         player.sendMessage(TextService.addPrefix(Text.empty().append(purchaser.getDisplayName()).append(" bought ").append(TextService.formatShopOffer(shop, server.getOverworld()))));
     }
 
-    public static boolean shopHasStock(ShopModel shop, ChestBlockEntity storageItem, ChestBlockEntity storagePrice, ItemStack item, ItemStack price){
+    public static boolean shopHasStock(ShopModel shop, Inventory storageItem, Inventory storagePrice, ItemStack item, ItemStack price){
         if(!InventoryUtil.canStore(storagePrice, price.getItem(), shop.getPriceAmount())) return false;
         return InventoryUtil.countItems(storageItem, item) >= shop.getItemAmount();
     }

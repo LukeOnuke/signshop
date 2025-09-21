@@ -4,9 +4,8 @@ import com.lukeonuke.SignShop;
 import com.lukeonuke.model.MessageModel;
 import com.lukeonuke.model.ShopCreationModel;
 import com.lukeonuke.model.ShopModel;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
@@ -14,7 +13,6 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 /**
  * In memory storage for shop creation state.
@@ -110,7 +108,7 @@ public class ShopCreationService {
     }
 
     private MessageModel setItemOrPrice(ShopModel reference, ShopPosition itemPos, MinecraftServer server, boolean isItem){
-        // Set message prefix so players know if it's the price or item!
+        // Set message prefix so players know if it's the price or item.
         String loggingPrefix = "Price";
         if(isItem) loggingPrefix = "Item";
 
@@ -127,15 +125,14 @@ public class ShopCreationService {
             return new MessageModel("Internal server error! itemWorld==null", false);
         }
 
-        // Get chest and check if it exists
-        Optional<ChestBlockEntity> chestOptional = itemWorld.getBlockEntity(itemPos.getBlockPos(), BlockEntityType.CHEST);
-        if(chestOptional.isEmpty()) return new MessageModel("Chest doesn't exist!", false);
-        ChestBlockEntity chest = chestOptional.get();
+        // Get storage and check if it exists
+        Inventory storage = ShopUtil.getStorage(itemPos, server);
+        if(storage == null) return new MessageModel(loggingPrefix + " storage doesn't exist!", false);
 
         // Get item(stack) and validate
-        ItemStack item = InventoryUtil.getFirstItem(chest);
-        if(item == null) return new MessageModel(loggingPrefix + " storage is empty! Can't read what the item is if it doesnt exist.", false);
-        int itemAmount = InventoryUtil.countItems(chest, item);
+        ItemStack item = InventoryUtil.getFirstItem(storage);
+        if(item == null) return new MessageModel(loggingPrefix + " storage is empty! Can't read what the item is if it doesn't exist.", false);
+        int itemAmount = InventoryUtil.countItems(storage, item);
         if(itemAmount <= 0) return new MessageModel(loggingPrefix + " cant be 0 or negative!", false);
 
         // Serialise item(stack) and validate serialisation

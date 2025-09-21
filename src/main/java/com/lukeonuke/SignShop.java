@@ -27,6 +27,8 @@ public class SignShop implements ModInitializer {
 		// Proceed with mild caution.
 
 		LOGGER.info("signshop starting...");
+		LOGGER.info("Signshop is still in its early alpha stage. Every release gets used on the beocraft server, " +
+				"so its stable enough. But if you find any errors, report em to https://github.com/LukeOnuke/signshop");
 		LOGGER.info("	- Starting services");
 		LOGGER.info("		* ConfigurationService");
 		ConfigurationService.getInstance();
@@ -41,5 +43,6 @@ public class SignShop implements ModInitializer {
 		UseBlockCallback.EVENT.register(listener);
 		PlayerBlockBreakEvents.BEFORE.register(listener);
 		LOGGER.info("	- OK");
+		LOGGER.info("signshop started!");
 	}
 }

@@ -1,9 +1,8 @@
-package com.lukeonuke.model;
+package com.lukeonuke.model.nondb;
 
 import com.lukeonuke.service.ShopPosition;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.util.math.BlockPos;
 
 import java.util.Objects;
 
@@ -16,6 +15,10 @@ public class ShopCreationModel {
 
     public boolean isValid() {
         return Objects.nonNull(itemPos) && Objects.nonNull(pricePos) && Objects.nonNull(signPos);
+    }
+
+    public boolean containsData() {
+        return Objects.nonNull(itemPos) || Objects.nonNull(pricePos) || Objects.nonNull(signPos);
     }
 
     @Override

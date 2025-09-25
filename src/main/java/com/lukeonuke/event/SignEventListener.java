@@ -1,6 +1,6 @@
 package com.lukeonuke.event;
 
-import com.lukeonuke.model.MessageModel;
+import com.lukeonuke.model.nondb.MessageModel;
 import com.lukeonuke.model.ShopModel;
 import com.lukeonuke.service.*;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
@@ -26,7 +26,7 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
     // attack
     @Override
     public ActionResult interact(PlayerEntity playerEntity, World world, Hand hand, BlockPos blockPos, Direction direction) {
-        // Check prerequisites
+        // Initialise and check prerequisites
         if (world.isClient) return ActionResult.PASS;
         final MinecraftServer server = playerEntity.getServer();
         if (server == null) return ActionResult.PASS;
@@ -62,26 +62,37 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
                     return ActionResult.FAIL;
                 }
             } else {
-                // If player clicked on a non chest/sign block reset creation storage.
-                scs.reset(playerEntity);
-                playerEntity.sendMessage(TextService.addPrefix(TextService.successFormat("Cleared shop creation storage.")), false);
-                return ActionResult.FAIL;
+                // If player clicked on a non chest/sign block, reset creation storage.
+                if(scs.getShopCreationModel(playerEntity).containsData()){
+                    scs.reset(playerEntity);
+                    playerEntity.sendMessage(TextService.addPrefix(TextService.successFormat("Cleared shop creation storage.")), false);
+                }
+                return ActionResult.PASS; // As of 0.0.3-ALPHA, resetting shop creation storage lets the player interact with the block below.
             }
         } else {
-            // Get shop information and to player.
+            // Get shop information and send to player.
             final SignBlockEntity sign = ShopUtil.getSignIfQualifiesAsShop(world, blockPos);
             if (sign == null) return ActionResult.PASS;
 
             final DatabaseService ds = DatabaseService.getInstance();
             final ShopModel shop = ds.getShopByPosition(new ShopPosition(world, blockPos));
             if (shop == null) return ActionResult.PASS;
-            playerEntity.sendMessage(
-                    TextService.addPrefix(
-                            Text.literal("Sells ").append(TextService.formatShopOffer(shop, world))
-                    )
-                    , false
-            );
-            if (shop.getOwner().equals(playerEntity.getUuid())) return ActionResult.PASS;
+            if (shop.getOwner().equals(playerEntity.getUuid())) {
+                // If it's the owner of the sign.
+                if(playerEntity.isSneaking()){
+                    // Let them break the sign and update the shop.
+                    return ActionResult.PASS;
+                } else {
+                    // Update shop sign, don't let them break the sign. Not shifting, nuh uh.
+                    ShopUtil.formatShop(sign, ShopUtil.shopHasStock(shop, server));
+                    playerEntity.sendMessage(TextService.addPrefix(TextService.tipFormat("To break the shop, sneak whilst breaking the sign.")), false);
+                    sendShopOffer(playerEntity, shop, world);
+                    playerEntity.sendMessage(TextService.addPrefix(TextService.successFormat("Updated shop.")), true);
+                    return ActionResult.FAIL;
+                }
+
+            }
+            sendShopOffer(playerEntity, shop, world);
             return ActionResult.FAIL;
         }
 
@@ -114,7 +125,7 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
             }else {
                 // If transaction failed return why and format shop.
                 playerEntity.sendMessage(message.getAsTextMessage(), false);
-                ShopUtil.formatShop(sign, false);
+                if (!message.isPlayersFault()) ShopUtil.formatShop(sign, false);
             }
             return ActionResult.FAIL;
         }
@@ -132,13 +143,22 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
         final DatabaseService ds = DatabaseService.getInstance();
         ShopModel shop = ds.getShopByPosition(new ShopPosition(world, blockPos));
         if (shop == null) return true;
-        // If shop exists and the owner is the player allow breaking it.
-        if (shop.getOwner().equals(playerEntity.getUuid())) {
+        // If shop exists AND the owner is the player AND player is sneaking, then allow breaking it.
+        if (shop.getOwner().equals(playerEntity.getUuid()) && playerEntity.isSneaking()) {
             ds.softDeleteShopById(shop.getId());
             playerEntity.sendMessage(TextService.addPrefix(TextService.successFormat("Shop has been removed!")), true);
             return true;
         }
         // Otherwise return false
         return false;
+    }
+
+    private void sendShopOffer(PlayerEntity pe, ShopModel shop, World world){
+        pe.sendMessage(
+                TextService.addPrefix(
+                        Text.literal("Sells ").append(TextService.formatShopOffer(shop, world))
+                )
+                , false
+        );
     }
 }

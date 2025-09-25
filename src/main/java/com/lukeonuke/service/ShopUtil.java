@@ -1,6 +1,6 @@
 package com.lukeonuke.service;
 
-import com.lukeonuke.model.MessageModel;
+import com.lukeonuke.model.nondb.MessageModel;
 import com.lukeonuke.model.ShopModel;
 import com.lukeonuke.model.TransactionModel;
 import net.minecraft.block.entity.*;
@@ -52,8 +52,8 @@ public class ShopUtil {
 
         // Verify if user can even afford and store the items
         int availablePrice = InventoryUtil.countItems(playerInventory, price);
-        if(availablePrice < shop.getPriceAmount()) return new MessageModel("You can't afford this!", false);
-        if(!InventoryUtil.canStore(playerInventory, item.getItem(), shop.getItemAmount())) return new MessageModel("Not enough inventory space to buy!", false);
+        if(availablePrice < shop.getPriceAmount()) return new MessageModel("You can't afford this!", false, true);
+        if(!InventoryUtil.canStore(playerInventory, item.getItem(), shop.getItemAmount())) return new MessageModel("Not enough inventory space to buy!", false, true);
 
         // Get and verify the chests
         ShopPosition storagePricePos = ShopPosition.fromString(shop.getStoragePricePos());
@@ -139,7 +139,42 @@ public class ShopUtil {
         player.sendMessage(TextService.addPrefix(Text.empty().append(purchaser.getDisplayName()).append(" bought ").append(TextService.formatShopOffer(shop, server.getOverworld()))));
     }
 
+    /**
+     * Calculate if shop has stock.
+     * @param shop Shop model referring to aforementioned shop.
+     * @param storageItem Storage for shop item.
+     * @param storagePrice Storage for shop price.
+     * @param item Shop item.
+     * @param price Shop price.
+     * @return Does shop has enough stock to complete at least one transaction.
+     */
     public static boolean shopHasStock(ShopModel shop, Inventory storageItem, Inventory storagePrice, ItemStack item, ItemStack price){
+        if(!InventoryUtil.canStore(storagePrice, price.getItem(), shop.getPriceAmount())) return false;
+        return InventoryUtil.countItems(storageItem, item) >= shop.getItemAmount();
+    }
+
+    /**
+     * Calculate if shop has stock.
+     * @param shop Shop model referring to aforementioned shop.
+     * @param server Server that contains the shop.
+     * @return Does shop has enough stock to complete at least one transaction.
+     */
+    public static boolean shopHasStock(ShopModel shop, MinecraftServer server){
+        ItemStack item = shop.getItemAsItemStack(server.getOverworld());
+        if(item == null) return false;
+        ItemStack price = shop.getPriceAsItemStack(server.getOverworld());
+        if(price == null) return false;
+
+        ShopPosition storagePricePos = ShopPosition.fromString(shop.getStoragePricePos());
+        ShopPosition storageItemPos = ShopPosition.fromString(shop.getStorageItemPos());
+        if(storagePricePos == null || storageItemPos == null) return false;
+
+        Inventory storagePrice = getStorage(storagePricePos, server);
+        if(storagePrice == null) return false;
+        Inventory storageItem = getStorage(storageItemPos, server);
+        if(storageItem == null) return false;
+
+        // Verify if the chests have the item and store the results of the transaction
         if(!InventoryUtil.canStore(storagePrice, price.getItem(), shop.getPriceAmount())) return false;
         return InventoryUtil.countItems(storageItem, item) >= shop.getItemAmount();
     }

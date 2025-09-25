@@ -1,8 +1,8 @@
 package com.lukeonuke.service;
 
 import com.lukeonuke.SignShop;
-import com.lukeonuke.model.MessageModel;
-import com.lukeonuke.model.ShopCreationModel;
+import com.lukeonuke.model.nondb.MessageModel;
+import com.lukeonuke.model.nondb.ShopCreationModel;
 import com.lukeonuke.model.ShopModel;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;

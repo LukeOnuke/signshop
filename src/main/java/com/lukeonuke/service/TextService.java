@@ -38,6 +38,10 @@ public class TextService {
         return Text.literal(text).formatted(Formatting.RED);
     }
 
+    public static MutableText tipFormat(String text) {
+        return Text.literal(text).formatted(Formatting.GRAY, Formatting.ITALIC);
+    }
+
     public static MutableText formatShopOffer(ShopModel shop, World world) {
         return Text.literal(shop.getItemAmount() + "x ")
                 .append(getItemNameWithEnchantments(shop.getItemAsItemStack(world)))

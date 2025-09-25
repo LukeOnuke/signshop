@@ -1,4 +1,4 @@
-package com.lukeonuke.model;
+package com.lukeonuke.model.nondb;
 
 import com.lukeonuke.service.TextService;
 import lombok.AllArgsConstructor;
@@ -12,6 +12,13 @@ import net.minecraft.util.Formatting;
 public class MessageModel {
     private String message;
     private boolean success;
+    private boolean isPlayersFault;
+
+    public MessageModel(String message, boolean success) {
+        this.message = message;
+        this.success = success;
+        this.isPlayersFault = false;
+    }
 
     /**
      * Get as fully formatted text ready for player feedback.

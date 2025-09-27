@@ -63,7 +63,36 @@ This section of the README goes over the technical inner workings of the
 signshop mod.
 > [!NOTE]
 > This part of the text is still being written.
+## Method of operation
+Signshop operates signs using the `SignEventListener`, it listens to:
+- block break events
+- block attack events
+- block use events
 
+## Nomenclature
+All mod code is situated in main *(server side module)*, packages all are 
+situated in `com.lukeonuke`. They are separated as follows:
+- `.event` - Houses event listeners, currently only `SignEventListener`
+- `.mixin` - Isn't used, likely to be removed.
+- `.model` - Houses database data models.
+  - `.model.nondb` - Houses models for data that isn't stored in the database.
+- `.service` - Houses services.
+
+### Service class naming
+Classes that end in `Util`, e.g. `ShopUtil` or `InventoryUtil` house static 
+methods. Classes that end in `Service` are usually singletons.
+
+## Filesystem usage
+Only file this mod operates directly is stored in `/config/signshop` directory.
+The said file is the configuration file *(see: section Configuration of the 
+admin guide)* *(see: section First setup of the admin guide)* 
+`config.properties`.
+
+## Why caching isn't used?
+It the mods intended use case, where the database is hosted on the same machine
+or in the same building as the game server, the delay between a request and a
+response is so little that there is no need to add additional code to cache
+and validate the cache.
 
 
 

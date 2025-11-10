@@ -3,6 +3,9 @@ package com.lukeonuke.service;
 import com.lukeonuke.model.nondb.MessageModel;
 import com.lukeonuke.model.ShopModel;
 import com.lukeonuke.model.TransactionModel;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -11,6 +14,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -88,6 +93,8 @@ public class ShopUtil {
         sendTransactionNotification(shop, server, player);
         formatShop(sign, shopHasStock(shop, storageItem, storagePrice, item, price));
 
+        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_BIT.value(), SoundCategory.BLOCKS, 0.5f, 1.5f);
+
         return new MessageModel("Bought " + shop.getItemAmount() + "x " + item.getName().getString() + " for " + shop.getPriceAmount() + "x " + price.getName().getString(), true);
     }
 
@@ -102,7 +109,17 @@ public class ShopUtil {
         ServerWorld world = server.getWorld(pos.getWorldAsRegistryKey());
         if (world == null) return null;
         //return world.getBlockEntity(pos.getBlockPos(), BlockEntityType.CHEST).orElse(null);
-        BlockEntity inventoryCandidate = world.getBlockEntity(pos.getBlockPos());
+        final BlockPos blockPos = pos.getBlockPos();
+        BlockEntity inventoryCandidate = world.getBlockEntity(blockPos);
+        BlockState state = world.getBlockState(blockPos);
+        Block block = state.getBlock();
+
+        // Check if it's a doublechest.
+        if(block instanceof ChestBlock chestBlock){
+            Inventory inventory = ChestBlock.getInventory(chestBlock, state, world, blockPos, false);
+            if (inventory != null) return inventory;
+        }
+
         if (inventoryCandidate instanceof Inventory inventory){
             return inventory;
         }
@@ -136,6 +153,7 @@ public class ShopUtil {
         UUID ownerUUID = shop.getOwner();
         ServerPlayerEntity player = server.getPlayerManager().getPlayer(ownerUUID);
         if(player == null) return;
+        player.playSoundToPlayer(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.BLOCKS, 0.5f, 1.5f);
         player.sendMessage(TextService.addPrefix(Text.empty().append(purchaser.getDisplayName()).append(" bought ").append(TextService.formatShopOffer(shop, server.getOverworld()))));
     }
 

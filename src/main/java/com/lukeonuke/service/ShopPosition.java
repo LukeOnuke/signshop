@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -43,6 +45,10 @@ public class ShopPosition {
     public RegistryKey<World> getWorldAsRegistryKey(){
         Identifier id = Identifier.of(getWorld());
         return RegistryKey.of(RegistryKeys.WORLD, id);
+    }
+
+    public ServerWorld getWorldAsObject(MinecraftServer server){
+        return server.getWorld(getWorldAsRegistryKey());
     }
 
     public BlockPos getBlockPos(){

@@ -7,6 +7,7 @@ import com.lukeonuke.SignShop;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -30,7 +31,9 @@ public class InventoryUtil {
      */
     public static int countItems(Inventory inventory, ItemStack item) {
         int count = 0;
-        for (int i = 0; i < inventory.size(); i++) {
+        final int size = getInventorySize(inventory);
+
+        for (int i = 0; i < size; i++) {
             ItemStack stack = inventory.getStack(i);
             if(ItemStack.areItemsAndComponentsEqual(stack, item)){
                 count += stack.getCount();
@@ -45,7 +48,9 @@ public class InventoryUtil {
      */
     @Nullable
     public static ItemStack getFirstItem(Inventory inventory) {
-        for (int i = 0; i < inventory.size(); i++) {
+        final int size = getInventorySize(inventory);
+
+        for (int i = 0; i < size; i++) {
             ItemStack stack = inventory.getStack(i);
             if (!stack.isEmpty()) {
                 return stack.copyWithCount(1);
@@ -59,8 +64,10 @@ public class InventoryUtil {
      * Doesn't modify inventory state.
      */
     public static boolean canStore(Inventory inventory, Item item, int count) {
+        final int size = getInventorySize(inventory);
+
         int remaining = count;
-        for (int i = 0; i < inventory.size(); i++) {
+        for (int i = 0; i < size; i++) {
             ItemStack stack = inventory.getStack(i);
             if (stack.isEmpty()) {
                 remaining -= item.getMaxCount();
@@ -79,7 +86,9 @@ public class InventoryUtil {
      */
     public static void addItems(Inventory inventory, ItemStack item, int count) {
         int remaining = count;
-        for (int i = 0; i < inventory.size(); i++) {
+        final int size = getInventorySize(inventory);
+
+        for (int i = 0; i < size; i++) {
             ItemStack stack = inventory.getStack(i);
             if (stack.isEmpty()) { //If slot is empty add max stack size or remaining.
                 int stackAmount = Math.min(remaining, item.getMaxCount());
@@ -106,7 +115,9 @@ public class InventoryUtil {
      */
     public static void removeItems(Inventory inventory, ItemStack item, int count) {
         int remaining = count;
-        for (int i = 0; i < inventory.size(); i++) {
+        final int size = getInventorySize(inventory);
+
+        for (int i = 0; i < size; i++) {
             ItemStack stack = inventory.getStack(i);
             if (stack.isEmpty()) continue;
 
@@ -122,6 +133,21 @@ public class InventoryUtil {
             }
         }
         inventory.markDirty();
+    }
+
+    /**
+     * Gets inventory size. Accounts for player inventories by artificially decreasing their size to not allow usage of
+     * armour slots.
+     *
+     * @return The inventory size. If it's a player inventory it will return 36 (size of players inventory - armour
+     * slots or offhand).
+     * @apiNote Use this if you need to work with inventories that also include players. If you aren't dealing with
+     * players there's no use in this.
+     * @since 0.0.4-ALPHA
+     * */
+    public static int getInventorySize(Inventory inventory){
+        if(inventory instanceof PlayerInventory) return 36;
+        return inventory.size();
     }
 
     @Nullable

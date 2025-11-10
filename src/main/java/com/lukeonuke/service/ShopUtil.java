@@ -36,7 +36,7 @@ public class ShopUtil {
         if(!(block instanceof SignBlockEntity sign)) return null;
         final SignText signText = sign.getText(true);
         // Does the first line of the sign contain trade?
-        if(signText.getMessage(0, true).getString().equals("[trade]")){
+        if(signText.getMessage(0, true).getString().equalsIgnoreCase("[trade]")){
             return sign;
         }
         return null;

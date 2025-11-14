@@ -36,7 +36,7 @@ public class SignShop implements ModInitializer {
 		DatabaseService.getInstance();
 		LOGGER.info("		* ShopCreationService");
 		ShopCreationService.getInstance();
-		LOGGER.info("	- OK");
+		LOGGER.info("	- OK > SERVICES INITIALISED");
 		LOGGER.info("	- Registering events");
 		SignEventListener listener = new SignEventListener();
 		AttackBlockCallback.EVENT.register(listener);

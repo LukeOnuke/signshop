@@ -84,8 +84,8 @@ methods. Classes that end in `Service` are usually singletons.
 
 ## Filesystem usage
 Only file this mod operates directly is stored in `/config/signshop` directory.
-The said file is the configuration file *(see: section Configuration of the 
-admin guide)* *(see: section First setup of the admin guide)* 
+The said file is the configuration file *(see: section "Configuration" of the 
+admin guide)* *(see: section "First setup" of the admin guide)* 
 `config.properties`.
 
 ## Why caching isn't used?

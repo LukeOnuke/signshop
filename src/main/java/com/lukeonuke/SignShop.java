@@ -3,9 +3,11 @@ package com.lukeonuke;
 import com.lukeonuke.event.SignEventListener;
 import com.lukeonuke.service.ConfigurationService;
 import com.lukeonuke.service.DatabaseService;
+import com.lukeonuke.service.ServerService;
 import com.lukeonuke.service.ShopCreationService;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -42,6 +44,11 @@ public class SignShop implements ModInitializer {
 		AttackBlockCallback.EVENT.register(listener);
 		UseBlockCallback.EVENT.register(listener);
 		PlayerBlockBreakEvents.BEFORE.register(listener);
+		ServerLifecycleEvents.SERVER_STARTING.register(minecraftServer -> {
+			ServerService.getInstance().setServer(minecraftServer);
+			LOGGER.info("ServerService initialised, primed to provide server instance.");
+		});
+
 		LOGGER.info("	- OK");
 		LOGGER.info("signshop started!");
 	}

@@ -27,8 +27,8 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
     @Override
     public ActionResult interact(PlayerEntity playerEntity, World world, Hand hand, BlockPos blockPos, Direction direction) {
         // Initialise and check prerequisites
-        if (world.isClient) return ActionResult.PASS;
-        final MinecraftServer server = playerEntity.getServer();
+        if (world.isClient()) return ActionResult.PASS;
+        final MinecraftServer server = ServerService.getInstance().getServer();
         if (server == null) return ActionResult.PASS;
 
         if (InventoryUtil.isHoldingRedstone(playerEntity)) {
@@ -103,7 +103,7 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
     @Override
     public ActionResult interact(PlayerEntity playerEntity, World world, Hand hand, BlockHitResult blockHitResult) {
         // Prerequisite
-        if (world.isClient) return ActionResult.PASS;
+        if (world.isClient()) return ActionResult.PASS;
 
         final BlockPos blockPos = blockHitResult.getBlockPos();
         final SignBlockEntity sign = ShopUtil.getSignIfQualifiesAsShop(world, blockPos);

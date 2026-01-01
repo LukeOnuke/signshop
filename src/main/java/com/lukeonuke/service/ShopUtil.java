@@ -30,6 +30,13 @@ public class ShopUtil {
         return getSignIfQualifiesAsShop(block) != null;
     }
 
+    /**
+     * Calculate if a specific BlockEntity fills all the requirements to be a
+     * shop-bearing sign.
+     * @param block The specific block entity to be checked.
+     * @return SignBlockEntity reference to a valid shop-bearing sign, or null
+     *  value if it's a non-valid shop-bearing sign.
+     */
     @Nullable
     public static SignBlockEntity getSignIfQualifiesAsShop(BlockEntity block){
         // Is sign?
@@ -42,15 +49,30 @@ public class ShopUtil {
         return null;
     }
 
+    /**
+     * Calculate if a specific BlockEntity fills all the requirements to be a
+     * shop-bearing sign.
+     * @param blockPos Position of block to be checked.
+     * @param world World that holds the block to be checked.
+     * @return SignBlockEntity reference to a valid shop-bearing sign, or null
+     * value if it's a non-valid shop-bearing sign.
+     */
     @Nullable
     public static SignBlockEntity getSignIfQualifiesAsShop(World world, BlockPos blockPos){
         final BlockEntity block = world.getBlockEntity(blockPos);
         return getSignIfQualifiesAsShop(block);
     }
 
+    /**
+     * The method that actually handles transactions between the player and the signshop.
+     * @param shop The shop that is going to bear the transaction.
+     * @param player The player that is going to bear the transaction.
+     * @param sign Reference to the sign that holds the shop.
+     * @return Message model providing feedback on the state of the transaction.
+     */
     public static MessageModel beginTransaction(ShopModel shop, PlayerEntity player, SignBlockEntity sign){
         PlayerInventory playerInventory = player.getInventory();
-        World world = player.getWorld();
+        World world = player.getEntityWorld();
 
         ItemStack item = shop.getItemAsItemStack(world);
         ItemStack price = shop.getPriceAsItemStack(world);
@@ -63,7 +85,7 @@ public class ShopUtil {
         // Get and verify the chests
         ShopPosition storagePricePos = ShopPosition.fromString(shop.getStoragePricePos());
         ShopPosition storageItemPos = ShopPosition.fromString(shop.getStorageItemPos());
-        MinecraftServer server = player.getServer();
+        final MinecraftServer server = ServerService.getInstance().getServer();
         if(server == null) return new MessageModel("Internal server error! server==null", false);
         if(storagePricePos == null || storageItemPos == null) return new MessageModel("Internal server error! Shop is corrupted! Cant read storage pos.", false);
 
@@ -93,7 +115,7 @@ public class ShopUtil {
         sendTransactionNotification(shop, server, player);
         formatShop(sign, shopHasStock(shop, storageItem, storagePrice, item, price));
 
-        player.playSoundToPlayer(SoundEvents.BLOCK_NOTE_BLOCK_BIT.value(), SoundCategory.BLOCKS, 0.5f, 1.5f);
+        player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_BIT.value(), 0.5f, 1.5f);
 
         return new MessageModel("Bought " + shop.getItemAmount() + "x " + item.getName().getString() + " for " + shop.getPriceAmount() + "x " + price.getName().getString(), true);
     }
@@ -153,7 +175,7 @@ public class ShopUtil {
         UUID ownerUUID = shop.getOwner();
         ServerPlayerEntity player = server.getPlayerManager().getPlayer(ownerUUID);
         if(player == null) return;
-        player.playSoundToPlayer(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.BLOCKS, 0.5f, 1.5f);
+        player.playSound(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.5f);
         player.sendMessage(TextService.addPrefix(Text.empty().append(purchaser.getDisplayName()).append(" bought ").append(TextService.formatShopOffer(shop, server.getOverworld()))));
     }
 

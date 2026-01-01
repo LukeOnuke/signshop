@@ -8,6 +8,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.KnowledgeBookItem;
 import net.minecraft.item.tooltip.TooltipData;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -50,26 +51,31 @@ public class TextService {
     }
 
     public static MutableText getItemNameWithEnchantments(ItemStack item){
-        MutableText text =
-                // Why so fucked up? So that the formatting only applies to the name
-                Text.empty().append(
-                    Text.empty().append(item.getFormattedName()).formatted(Formatting.BOLD)
-                );
-
-        StringBuilder sb = new StringBuilder(" (  ");
-        if(item.hasEnchantments()){
-            ItemEnchantmentsComponent itemEnchantmentsComponent = item.getEnchantments();
-            itemEnchantmentsComponent.getEnchantments().forEach(ere -> {
-                String id = ere.getIdAsString();
-                id = id.substring(id.indexOf(":") + 1);
-                sb.append(id.replace("_", " "));
-                sb.append(" ");
-                sb.append(itemEnchantmentsComponent.getLevel(ere));
-                sb.append("  ");
-            });
-            sb.append(")");
-        } else return text;
-
-        return text.append(Text.literal(sb.toString()).formatted(Formatting.GRAY, Formatting.ITALIC));
+        HoverEvent hoverEvent = new HoverEvent.ShowItem(item);
+        MutableText text = (MutableText) item.getFormattedName();
+        text.formatted(Formatting.BOLD);
+        text.styled(style -> style.withHoverEvent(hoverEvent));
+        return text;
+//        MutableText text =
+//                // Why so fucked up? So that the formatting only applies to the name
+//                Text.empty().append(
+//                    Text.empty().append(item.getFormattedName()).formatted(Formatting.BOLD)
+//                );
+//
+//        StringBuilder sb = new StringBuilder(" (  ");
+//        if(item.hasEnchantments()){
+//            ItemEnchantmentsComponent itemEnchantmentsComponent = item.getEnchantments();
+//            itemEnchantmentsComponent.getEnchantments().forEach(ere -> {
+//                String id = ere.getIdAsString();
+//                id = id.substring(id.indexOf(":") + 1);
+//                sb.append(id.replace("_", " "));
+//                sb.append(" ");
+//                sb.append(itemEnchantmentsComponent.getLevel(ere));
+//                sb.append("  ");
+//            });
+//            sb.append(")");
+//        } else return text;
+//
+//        return text.append(Text.literal(sb.toString()).formatted(Formatting.GRAY, Formatting.ITALIC));
     }
 }

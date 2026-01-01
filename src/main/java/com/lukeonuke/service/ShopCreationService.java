@@ -87,7 +87,7 @@ public class ShopCreationService {
         databaseModel.setPosition(shopCreation.getSignPos().toString());
         databaseModel.setOwner(pe.getUuid());
 
-        final MinecraftServer server = pe.getServer();
+        final MinecraftServer server = ServerService.getInstance().getServer();
         if (server == null){
             SignShop.LOGGER.error("Server was null whilst creating shop!");
             return new MessageModel("Internal server error! ShopCreationService#createShop server==null", false);

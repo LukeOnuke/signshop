@@ -3,6 +3,7 @@ package com.lukeonuke.event;
 import com.lukeonuke.model.nondb.MessageModel;
 import com.lukeonuke.model.ShopModel;
 import com.lukeonuke.service.*;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -77,7 +78,7 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
             final DatabaseService ds = DatabaseService.getInstance();
             final ShopModel shop = ds.getShopByPosition(new ShopPosition(world, blockPos));
             if (shop == null) return ActionResult.PASS;
-            if (shop.getOwner().equals(playerEntity.getUuid())) {
+            if (shop.getOwner().equals(playerEntity.getUuid()) || Permissions.check(playerEntity, "signshop.admin.breakothers", false)) {
                 // If it's the owner of the sign.
                 if(playerEntity.isSneaking()){
                     // Let them break the sign and update the shop.
@@ -143,8 +144,10 @@ public class SignEventListener implements AttackBlockCallback, UseBlockCallback,
         final DatabaseService ds = DatabaseService.getInstance();
         ShopModel shop = ds.getShopByPosition(new ShopPosition(world, blockPos));
         if (shop == null) return true;
-        // If shop exists AND the owner is the player AND player is sneaking, then allow breaking it.
-        if (shop.getOwner().equals(playerEntity.getUuid()) && playerEntity.isSneaking()) {
+        // If shop exists
+        // AND the owner is the player (OR the player has signshop.admin.breakothers)
+        // AND player is sneaking, then allow breaking it.
+        if ((shop.getOwner().equals(playerEntity.getUuid()) || Permissions.check(playerEntity, "signshop.admin.breakothers", false)) && playerEntity.isSneaking()) {
             ds.softDeleteShopById(shop.getId());
             playerEntity.sendMessage(TextService.addPrefix(TextService.successFormat("Shop has been removed!")), true);
             return true;

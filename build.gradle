@@ -50,6 +50,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	implementation platform("org.hibernate.orm:hibernate-platform:7.1.1.Final")
+	include(modImplementation('me.lucko:fabric-permissions-api:0.6.1'))
 
 	// use the versions from the platform
 	implementation "org.hibernate.orm:hibernate-core"
